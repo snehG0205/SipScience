@@ -17,6 +17,8 @@ import time
 
 import  psycopg2
 
+from datetime import datetime
+
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_colwidth', -1)
@@ -98,37 +100,67 @@ def writeData():
     new_df['Category Name'] = item_category
     new_df['Closed At'] = new_df['Closed At'].fillna("None")
     
+    opened_unix = df['opened_at'].tolist()
+    closed_unix = df['closed_at'].tolist()
+    opened_ts = []
+    closed_ts = []
+    for i in opened_unix:
+        ts = int(i)
+        opened_ts.append(datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
+    for j in closed_unix:
+        ts = int(i)
+        closed_ts.append(datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))    
+    new_df['Opened At'] = opened_ts
+    new_df['Closed At'] = closed_ts
+
+    
     new_df.to_csv("data.csv")
    
+    
     connection = psycopg2.connect( host=hostname, user=username, password=password, dbname=database )
     cursor = connection.cursor()
     
     
     
-    for Ticket_ID, record in new_df.groupby('Ticket_ID'):
-        ticketId = str(record['Ticket_ID'].values[0])
-        total = str(record['Total'].values[0])
-        subtotal = str(record['Subtotal'].values[0])
-        tax = str(record['Tax'].values[0])
-        tips = str(record['Tips'].values[0])
-        openedAt = str(record['Opened At'].values[0])
-        closedAt = str(record['Closed At'].values[0])
-        orderType = str(record['Order Type'].values[0])
-        itemName = str(record['Item Name'].values[0])
-        catName = str(record['Category Name'].values[0])
-    
-    
+    cursor.execute( "SELECT ticketid FROM OmnivoreDatanew" )
+    existing_tickets = []
+    for tId in cursor.fetchall() :
+        existing_tickets.append(str(tId[0]))
         
-        postgres_insert_query =  "INSERT INTO OmnivoreDatanew VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
-        record_to_insert = (ticketId,total,subtotal,tax,openedAt,closedAt,orderType,itemName,catName,tips)
-        cursor.execute(postgres_insert_query, record_to_insert)
-        connection.commit()
+    new_df=new_df[~new_df['Ticket_ID'].isin(existing_tickets)]
+    
+    
+    if not new_df.empty:
+        for Ticket_ID, record in new_df.groupby('Ticket_ID'):
+            ticketId = str(record['Ticket_ID'].values[0])
+            total = str(record['Total'].values[0])
+            subtotal = str(record['Subtotal'].values[0])
+            tax = str(record['Tax'].values[0])
+            tips = str(record['Tips'].values[0])
+            openedAt = str(record['Opened At'].values[0])
+            closedAt = str(record['Closed At'].values[0])
+            orderType = str(record['Order Type'].values[0])
+            itemName = str(record['Item Name'].values[0])
+            catName = str(record['Category Name'].values[0])
+    
+    
+    
+            postgres_insert_query =  "INSERT INTO OmnivoreDatanew VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
+            record_to_insert = (ticketId,total,subtotal,tax,openedAt,closedAt,orderType,itemName,catName,tips)
+            cursor.execute(postgres_insert_query, record_to_insert)
+            connection.commit()
+        
+        print("Records inserted")
+    
+    else:
+        print("Database is up to date")
+    
     
     
     cursor.close()
     connection.close()
 
-schedule.every().day.at("16:55").do(writeData)
+schedule.every().day.at("09:00").do(writeData)
 
 
 while True:
