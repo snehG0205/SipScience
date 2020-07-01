@@ -10,13 +10,9 @@ import requests
 import pandas as pd
 import json  
 from pandas.io.json import json_normalize  
-
-
-import schedule
+import psycopg2
 import time
-
-import  psycopg2
-
+import schedule
 from datetime import datetime
 
 pd.set_option('display.max_columns', None)
@@ -30,6 +26,8 @@ def writeData():
     username = 'snehgajiwala'
     password = 'gajiwala'
     database = 'snehgajiwala'
+    
+    timestr = time.strftime("%Y%m%d-%H%M%S")
 
     link = 'https://api.omnivore.io/1.0/locations/'
     
@@ -56,7 +54,8 @@ def writeData():
     s = response.text
     j = json.loads(s)
     
-    with open('data.json', 'w') as f:
+    fname = "data_"+timestr+".json"
+    with open(fname, 'w') as f:
         json.dump(j, f)
     
     df = json_normalize(j['_embedded']['tickets']) 
@@ -114,7 +113,9 @@ def writeData():
     new_df['Closed At'] = closed_ts
 
     
-    new_df.to_csv("data.csv")
+    fname = 'ProductionData_'+timestr +'.csv'
+    new_df.set_index("Ticket_ID", inplace = True) 
+    new_df.to_csv("fname")
    
     
     connection = psycopg2.connect( host=hostname, user=username, password=password, dbname=database )
@@ -155,7 +156,15 @@ def writeData():
     else:
         print("Database is up to date")
     
+    master_df = pd.DataFrame(columns=['Ticket ID','Total','Subtotal','Tax','Opened At','Closed At','Order Type','Item Name','Category Name','Tips'])
+
+    cursor.execute( "SELECT * FROM OmnivoreDatanew" )
+    existing_tickets = []
+    for (ticketId,total,subtotal,tax,openedAt,closedAt,orderType,itemName,catName,tips) in cursor.fetchall() :
+        master_df.loc[len(master_df)]=[ticketId,total,subtotal,tax,openedAt,closedAt,orderType,itemName,catName,tips]
     
+    master_df.set_index("Ticket ID", inplace = True) 
+    master_df.to_csv("MasterDataset.csv")
     
     cursor.close()
     connection.close()

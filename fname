@@ -1,0 +1,9 @@
+Ticket_ID,Total,Subtotal,Tax,Tips,Opened At,Closed At,Order Type,Item Name,Category Name
+147662,0.0,0.0,0.0,0.0,2020-07-01 22:21:22,2020-06-27 21:15:06,Dine In,None,None
+147659,106.08,96.0,10.08,0.0,2020-07-01 21:59:45,2020-06-27 21:15:06,TakeOut ,"Taste of Fred's, Gr Shrimp, Gr Shrimp, Gr Shrimp","Seafood, Food, Smokehouse, Food"
+147661,0.0,0.0,0.0,0.0,2020-07-01 22:19:40,2020-06-27 21:15:06,Dine In,None,None
+147660,0.0,0.0,0.0,0.0,2020-07-01 22:02:32,2020-06-27 21:15:06,TakeOut ,None,None
+147658,0.0,0.0,0.0,0.0,2020-07-01 21:47:44,2020-06-27 21:15:06,Dine In,None,None
+147656,54.15,49.0,5.15,15.0,2020-07-01 21:06:11,2020-06-27 21:15:06,TakeOut ,"Full Rack Entree, Beans, Beans, Colelsaw, $ Baked Potato, $ Baked Potato, $ Baked Potato","Smokehouse, Food, Sides, Food, Side"
+147655,45.31,41.0,4.31,0.0,2020-07-01 21:01:03,2020-06-27 21:15:06,TakeOut ,"Sampler, Full Rack App","Food, Apps"
+147657,0.0,0.0,0.0,0.0,2020-07-01 21:16:39,2020-06-27 21:15:06,Dine In,None,None
